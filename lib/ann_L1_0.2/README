@@ -1,0 +1,126 @@
+ANN: Approximate Nearest Neighbors
+Version: 0.2 (Beta release)
+----------------------------------------------------------------------------
+Copyright (c) 1997-1998 University of Maryland and Sunil Arya and David Mount
+All Rights Reserved.
+
+This software and related documentation is part of the 
+Approximate Nearest Neighbor Library (ANN).
+
+Permission to use, copy, and distribute this software and its 
+documentation is hereby granted free of charge, provided that 
+(1) it is not a component of a commercial product, and 
+(2) this notice appears in all copies of the software and
+    related documentation. 
+
+ANN may be distributed by any means, provided that the original
+files remain intact, and no charge is made other than for reasonable
+distribution costs.
+
+Disclaimer
+----------
+The University of Maryland and the authors make no representations
+about the suitability or fitness of this software for any purpose.
+It is provided "as is" without express or implied warranty.
+
+----------------------------------------------------------------------------
+Version 0.1  03/04/98
+      Preliminary release
+Version 0.2  06/24/98
+      Changes for SGI compiler.
+----------------------------------------------------------------------------
+
+Authors
+-------
+David Mount
+Dept of Computer Science
+University of Maryland,
+College Park, MD 20742 USA
+mount@cs.umd.edu
+
+Sunil Arya
+Department of Computer Science
+The Hong Kong University of Science and Technology
+Clear Water Bay, Kowloon, Hong Kong
+arya@cs.ust.hk
+
+Introduction
+------------
+ANN is a library written in the C++ programming language to support both
+exact and approximate nearest neighbor searching in spaces of various
+dimensions.  It was implemented by David M. Mount of the University of
+Maryland, and Sunil Arya of the Hong Kong University of Science and
+Technology.  ANN (pronounced like the name ``Ann'') stands for Approximate
+Nearest Neighbors.  ANN is also a testbed containing programs and procedures
+for generating data sets, collecting and analyzing statistics on the
+performance of nearest neighbor algorithms and data structures, and
+visualizing the geometric structure of these data structures.
+
+In the nearest neighbor problem a set P of data points in d-dimensional
+space is given.  These points are preprocessed into a data structure, so
+that given any query point q, the nearest (or generally k nearest) points
+of P to q can be reported efficiently.  ANN is designed for data sets that
+are small enough that the search structure can be stored in main memory
+(in contrast to approaches from databases that assume that the data resides
+in secondary storage).  The distance between two points can be defined in
+many ways.  ANN assumes that distances are measured using any class of
+distance functions called Minkowski metrics.  These include the well known
+Euclidean distance, Manhattan distance, and max distance.
+
+For more information on ANN and its use, see the ``ANN Programming Manual.''
+
+Getting the software
+--------------------
+
+The ANN source code and documentation is available by anonymous ftp from
+the University of Maryland at the following address.
+
+    ftp://ftp.cs.umd.edu/pub/faculty/mount/ANN/ann_0.1.tar.gz
+
+It can also be accessed through the ANN web page at the following address.
+
+    http://www.cs.umd.edu/~mount/ANN
+
+Compiling ANN
+-------------
+
+ANN requires an ANSI standard C++ compiler.  It has been compiled successfully
+on Sun Workstations running SunOS 4.X and SunOS 5.X (Solaris) and on a DEC
+Alpha running Digital Unix v4.0.
+
+After downloading the sources, change to the ANN root directory (from which
+directories such as bin, doc, and include branch off) and enter the command
+make.  This will provide a list of platforms and options under which to
+compile ANN.  If you do not see your particular configuration on this list,
+then you might try modifying the file Make-config for your particular system.
+The authors welcome any additions to the list of supported platforms.
+
+The compilation stores the ANN library in the lib directory, and also
+compiles two utility programs.  These are the test and evaluation program
+anntest and the visualization tool annfig.  These are described in the
+ANN Programming Manual.
+
+Running ANN
+-----------
+
+In order to use ANN in a C++ program, the program must include the header
+file for ANN, which contains the declarations for the ANN objects and
+procedures.  This is done with the following statement in the C++ source
+code.
+
+    #include <ANN/ANN.h>
+
+This assumes that the ANN include directory is already on the compiler's
+search path for include files.  (On my SunOS 5 system, this is done by
+setting the -I option on the compilation command line to point to
+the include directory in the ANN base directory.)
+
+Then the program is linked with the ANN library.  (On my system this is
+done with the -l option on the compilation command line, assuming
+that the library search path has been set to include the ANN library
+directory.  This is set with the -L option.)   For example, on
+my system, the following command line could be used to compile the
+program my_program.cc using the ANN library.  Let C++ be the local
+C++ compiler.  Let ``ann'' denote the path to root ANN directory.
+
+    C++ my_program.cc -Iann/include -Lann/lib -lANN

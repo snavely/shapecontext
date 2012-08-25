@@ -1,0 +1,25 @@
+  validate on
+  stats query_stats
+  dim 8
+  data_size 5000
+  distribution uniform
+  seed 1
+gen_data_pts
+  distribution uniform
+  query_size 100
+  seed 2
+gen_query_pts
+  bucket_size 1
+  near_neigh 3
+  split_rule suggest
+  shrink_rule none
+build_ann
+  epsilon 0.0
+run_queries standard
+run_queries priority
+  epsilon 0.10
+run_queries standard
+run_queries priority
+  epsilon 0.50
+run_queries standard
+run_queries priority

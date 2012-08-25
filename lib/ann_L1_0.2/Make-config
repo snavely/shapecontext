@@ -1,0 +1,123 @@
+#-----------------------------------------------------------------------
+# Makefile variations depending on different configurations
+#
+# ANN: Approximate Nearest Neighbors
+# Version: 0.1 (Beta release)
+#
+# (This Make-config structure is based on the one used by Mesa by Brian
+# Paul.  If you succeed in porting ANN to your favorite system, please
+# send email to mount@cs.umd.edu, and I'll try to include it in this
+# list.)
+#
+#----------------------------------------------------------------------
+# The following configuration-dependent variables are passed to each
+# the Makefile in subdirectories:
+#
+# ANNLIB	The name of the ANN library file (usually libANN.a)
+# C++		The C compiler (usually CC or g++)
+# MAKELIB	The command and flags to make a library file (usually
+#		    "ar ...")
+# CFLAGS	Flags to C compiler
+# RANLIB	For "ranlib" = use ranlib, "true" = don't use ranlib
+#----------------------------------------------------------------------
+# Revision 0.1  09/06/97
+#	Initial release
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# Compilation options:
+# 		-DPERF		Enable performance evaluation
+#				(may slow execution slightly)
+#-----------------------------------------------------------------------------
+CFLAGS2 = -DPERF
+# CFLAGS2 = 
+
+sgi:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = CC -ansi" \
+	"CFLAGS = -O2 -DUSING_SGI" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = true"
+
+#					DEC Alpha with g++
+alpha-g++:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = g++" \
+	"CFLAGS = -O3 -DUSING_ALPHA" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = ranlib"
+
+#					SunOS4
+sunos4:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = CC" \
+	"CFLAGS = -O -DUSING_SUNOS4" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = ranlib"
+
+#					SunOS4 with g++
+sunos4-g++:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = g++" \
+	"CFLAGS = -O3 -DUSING_SUNOS4" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = ranlib"
+
+#					SunOS4 with g++ and shared libraries
+sunos4-g++-sl:			
+	$(MAKE) targets \
+	"ANNLIB = libANN.so" \
+	"C++ = g++" \
+	"CC = g++" \
+	"CFLAGS = -fPIC -O3 -DUSING_SUNOS4" \
+	"MAKELIB = ld -assert pure-text -o" \
+	"RANLIB = true"
+
+#					SunOS5
+sunos5:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = CC" \
+	"CFLAGS = -O -DUSING_SUNOS5" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = true"
+
+#					SunOS5 with shared libraries
+sunos5-sl:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = CC" \
+	"CFLAGS = -Kpic -O -DUSING_SUNOS5" \
+	"MAKELIB = ld -G -o" \
+	"RANLIB = true"
+
+#					SunOS5 with g++
+sunos5-g++:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = g++" \
+	"CFLAGS = -O3 -DUSING_SUNOS5" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = true"
+
+#					SunOS5 with g++ and shared libraries
+sunos5-g++-sl:
+	$(MAKE) targets \
+	"ANNLIB = libANN.so" \
+	"C++ = g++" \
+	"CFLAGS = -fpic -O3 -DUSING_SUNOS5" \
+	"MAKELIB = ld -G -o" \
+	"RANLIB = true"
+
+#					debugging version for authors
+authors-debug:
+	$(MAKE) targets \
+	"ANNLIB = libANN.a" \
+	"C++ = g++" \
+	"CFLAGS = -g -DUSING_SUNOS5" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = true"
