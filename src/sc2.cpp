@@ -555,13 +555,13 @@ int main_ada_maps(int argc, char **argv)
 
 void printUsage(char *name) 
 {
-    printf("Usages: %s initMaps <edge-image1.bmp> <edge-image2.bmp> "
-	   "<dpyr12-out> <dpyr21-out>\n", name);
-    printf("        %s smoothMaps <edge-image1.bmp> <edge-image2.bmp> "
+    printf("Usage: %s initMaps <edgeimg1.bmp> <edgeimg2.bmp> "
+	   "[dpyr12-out] [dpyr21-out]\n", name);
+    printf("       %s smoothMaps <edge-image1.bmp> <edge-image2.bmp> "
 	   "<dpyr12-in> <dpyr21-in> <dpyr12-out> <dpyr21-out>"
 	   "<params.txt>\n", 
 	   name);
-    printf("        %s adaMaps <edge-image1.bmp> <edge-image2.bmp "
+    printf("       %s adaMaps <edge-image1.bmp> <edge-image2.bmp "
 	   "<dpyr12-ada> <dpyr21-ada> <dpyr12-in> <dpyr21-in> "
 	   "<dpyr12-out> <dpyr21-out>\n", 
 	   name);
