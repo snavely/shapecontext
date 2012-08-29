@@ -16,9 +16,11 @@ LA_LIBS=-lmkl_intel_thread -lmkl_core -lmkl_intel_lp64 -lmkl_lapack \
 LIBS=-limage -lmatrix -lm $(LA_LIBS) -lminpack -lANN
 
 CFLAGS=-Wall -fopenmp -O3 -ffast-math -Wall -mfpmath=sse -msse2 -mssse3 -funroll-loops -march=core2 $(INCLUDE_PATH)
+#CFLAGS=-g2 $(INCLUDE_PATH)
 CPPFLAGS=-Wall -fopenmp -O3 -ffast-math -Wall -mfpmath=sse -msse2 -mssse3 -funroll-loops -march=core2 $(INCLUDE_PATH)
+#CPPFLAGS=-g2 $(INCLUDE_PATH)
 
-all: sc3 sc_test pts2dmap drawpts morphimg2
+all: sc2 sc3 sc_test pts2dmap drawpts morphimg2
 
 sc2: $(OBJS) sc2.o
 	$(CPP) $(CFLAGS) -o $@ $(OBJS) sc2.o $(LIB_PATH) $(LIBS)

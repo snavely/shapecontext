@@ -16,7 +16,8 @@
 
 /* Compute shape contexts for every point on an image */
 void compute_shape_context(img_t *img_edge, int num_rings, int num_wedges,
-			   double factor, double sigma, int normalize, 
+			   double factor, double sigma, 
+                           int normalize, int take_sqrt,
 			   vec_t *descriptors)
 {
     int w = img_edge->w;
@@ -32,7 +33,7 @@ void compute_shape_context(img_t *img_edge, int num_rings, int num_wedges,
 	for (x = 0; x < w; x++) {
             int idx = y * w + x;
 	    compute_shape_context_pt(img_edge, x, y, num_rings, num_wedges,
-				     factor, sigma, normalize, 
+				     factor, sigma, normalize, take_sqrt,
                                      descriptors[idx].p);
 	}
     }
@@ -42,7 +43,8 @@ void compute_shape_context(img_t *img_edge, int num_rings, int num_wedges,
 /* Compute a shape context given an edge confidence image and a point */
 void compute_shape_context_pt(img_t *img_edge, int x_p, int y_p, 
 			      int num_rings, int num_wedges,
-			      double factor, double sigma, int normalize, 
+			      double factor, double sigma, 
+                              int normalize, int take_sqrt,
 			      double *descriptor)
 {
     /* Compute the radius of the log-polar circle */
@@ -153,6 +155,9 @@ void compute_shape_context_pt(img_t *img_edge, int x_p, int y_p,
 	if (mass > 0.0) {
 	    for (i = 0; i < feature_size; i++) {
 		descriptor[i] /= mass;
+
+                if (take_sqrt)
+                    descriptor[i] = sqrt(descriptor[i]);
 		// descriptor[i] *= 2048.0;
 	    }
 	}

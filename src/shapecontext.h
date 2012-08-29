@@ -11,13 +11,15 @@ extern "C" {
 
 /* Compute shape contexts for every point on an image */
 void compute_shape_context(img_t *img_edge, int num_rings, int num_wedges,
-			   double factor, double sigma, int normalize, 
+			   double factor, double sigma, 
+                           int normalize, int take_sqrt,
 			   vec_t *descriptors);
 
 /* Compute a shape context given an edge confidence image and a point */
 void compute_shape_context_pt(img_t *img_edge, int x_p, int y_p, 
 			      int num_rings, int num_wedges,
-			      double factor, double sigma, int normalize, 
+			      double factor, double sigma, 
+                              int normalize, int take_sqrt,
 			      double *descriptor);
 
 #ifdef __cplusplus

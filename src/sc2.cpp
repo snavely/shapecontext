@@ -21,6 +21,8 @@
 #include "register.h"
 #include "shapecontext.h"
 
+#define __ADD_SPATIAL_DIMENSIONS__
+
 typedef struct {
     float x, y;  // feature position
     vec_t v;     // descriptor vector
@@ -78,7 +80,7 @@ std::vector<feature_t>
     }
 
     compute_shape_context(img_edge, num_rings, num_wedges, factor, sigma, 
-			  normalize, &(v[0]));
+			  normalize, 1, &(v[0]));
 
     std::vector<feature_t> features;
     features.resize(num_pixels);
@@ -381,11 +383,19 @@ int main_initialize_maps(int argc, char **argv)
     img_t *img_edge1 = img_read_bmp_file(in_image1);
     img_t *img_edge2 = img_read_bmp_file(in_image2);
     
-#define NUM_RINGS 5 // 6 // 4 // 6 // 14
+#if 0 // original settings
+#define NUM_RINGS   5 // 6 // 4 // 6 // 14
 #define NUM_WEDGES 12 // 8
-#define FACTOR 2.4 // 2.0 // 3.0 // 2.0
-#define SIGMA 1.0 /* For now, sigma is not used */
-#define NORMALIZE 1
+#define FACTOR    2.4 // 2.0 // 3.0 // 2.0
+#define SIGMA     1.0 /* For now, sigma is not used */
+#define NORMALIZE   1
+#else
+#define NUM_RINGS   5 // 6 // 4 // 6 // 14
+#define NUM_WEDGES 36 // 12 // 8
+#define FACTOR    2.4 // 2.0 // 3.0 // 2.0
+#define SIGMA     1.0 /* For now, sigma is not used */
+#define NORMALIZE   1
+#endif
 
     /* First shape context */
     printf("Computing first shape context...\n");
@@ -406,7 +416,12 @@ int main_initialize_maps(int argc, char **argv)
         std::vector<vec_t> v1, v2;
         int f1_size = (int) f1.size();
         int f2_size = (int) f2.size();
+        int dim = f1[0].v.d;
 
+        v1.resize(f1_size);
+        v2.resize(f2_size);
+
+#ifndef __ADD_SPATIAL_DIMENSIONS__        
         for (int i = 0; i < f1_size; i++) {
             v1[i] = f1[i].v;
         }
@@ -414,6 +429,22 @@ int main_initialize_maps(int argc, char **argv)
         for (int i = 0; i < f2_size; i++) {
             v2[i] = f2[i].v;
         }
+#else
+#define SPATIAL_SCALE 0.005
+        for (int i = 0; i < f1_size; i++) {
+            v1[i] = vec_new(dim + 2);
+            v1[i].p[0] = SPATIAL_SCALE * f1[i].x;
+            v1[i].p[1] = SPATIAL_SCALE * f1[i].y;
+            memcpy(v1[i].p+2, f1[i].v.p, dim * sizeof(double));
+        }
+
+        for (int i = 0; i < f2_size; i++) {
+            v2[i] = vec_new(dim + 2);
+            v2[i].p[0] = SPATIAL_SCALE * f2[i].x;
+            v2[i].p[1] = SPATIAL_SCALE * f2[i].y;
+            memcpy(v2[i].p+2, f2[i].v.p, dim * sizeof(double));
+        }
+#endif
 
         printf("Matching shape contexts [1==>2]...\n");
         dmap1to2 = match_shape_contexts(img_edge1, img_edge2, 
