@@ -36,7 +36,8 @@ void cspnd_set_similarity_threshold(double t) {
 }
 
 /* Find correspondences from image B to image A */
-img_dmap_t *img_find_correspondence(img_t *a, img_t *b, int diameter, img_dmap_t *amap, img_dmap_t *bmap) {
+img_dmap_t *img_find_correspondence(img_t *a, img_t *b, 
+                                    int diameter, img_dmap_t *amap, img_dmap_t *bmap) {
     trans2D_t *T;
     img_t *b_warp;
     img_dist_pyr_t *apyr_new, *bpyr_new;
@@ -108,7 +109,9 @@ img_dmap_t *img_find_correspondence(img_t *a, img_t *b, int diameter, img_dmap_t
 /* Estimate correspondences from image B to image A by detecting
  * symmetric matches.  The correspondences are returned in the form of
  * a distance map */
-img_dmap_t *img_estimate_correspondence(img_t *a, img_t *b, img_dmap_t *amap, img_dmap_t *bmap) {
+img_dmap_t *img_estimate_correspondence(img_t *a, img_t *b, 
+                                        img_dmap_t *amap, img_dmap_t *bmap) 
+{
     img_dmap_t *bmap_new = img_dmap_new(bmap->w, bmap->h);
     int x, y;
 

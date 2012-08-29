@@ -8,8 +8,8 @@
 #include <string.h>
 
 #include "cspnd.h"
-// #include "dmap.h"
-// #include "dmap-io.h"
+#include "dmap.h"
+#include "dmap-io.h"
 #include "image.h"
 #include "matrix.h"
 #include "pyramid.h"
@@ -70,6 +70,7 @@ std::vector<feature_t>
     int h = img_edge->h;
     int num_pixels = w * h;
     int descriptor_size = num_rings * num_wedges;
+    int take_sqrt = 1;
     // vec_t *v = (vec_t *) malloc(sizeof(vec_t) * num_pixels);
 
     std::vector<vec_t> v;
@@ -80,7 +81,7 @@ std::vector<feature_t>
     }
 
     compute_shape_context(img_edge, num_rings, num_wedges, factor, sigma, 
-			  normalize, 1, &(v[0]));
+			  normalize, take_sqrt, &(v[0]));
 
     std::vector<feature_t> features;
     features.resize(num_pixels);
@@ -98,7 +99,6 @@ std::vector<feature_t>
     return features;
 }
 
-#if 0
 int main_smooth_maps(int argc, char **argv) 
 {
     MotionParams params;
@@ -162,7 +162,7 @@ int main_smooth_maps(int argc, char **argv)
 				dmap1to2_out, dmap2to1_out, false);
 
     matrix_print(3, 3, params.M);
-    printf("[round1] num_inliers = %d\n", inliers.size());
+    printf("[round1] num_inliers = %d\n", (int) inliers.size());
     fflush(stdout);
 
     tmp1 = dmap2dpyr(dmap1to2_out);
@@ -240,7 +240,7 @@ int main_smooth_maps(int argc, char **argv)
 				MotionThinPlateSpline, 256, 15.0, &params,
 				dmap1to2_out2, dmap2to1_out2, false);
 
-    printf("[round2] num_inliers = %d\n", inliers.size());
+    printf("[round2] num_inliers = %d\n", (int) inliers.size());
     fflush(stdout);
 #endif
 
@@ -251,7 +251,7 @@ int main_smooth_maps(int argc, char **argv)
 				MotionThinPlateSpline, 64, 3.0, &params,
 				dmap1to2_out3, dmap2to1_out3, true);
 
-    printf("[round3] num_inliers = %d\n", inliers.size());
+    printf("[round3] num_inliers = %d\n", (int) inliers.size());
     fflush(stdout);
 #endif
 
@@ -343,7 +343,6 @@ int main_smooth_maps(int argc, char **argv)
 
     return 0;
 }
-#endif
 
 int main_initialize_maps(int argc, char **argv) 
 {
@@ -607,9 +606,9 @@ int main(int argc, char **argv)
     
     if (strcmp(argv[1], "initMaps") == 0) {
 	return main_initialize_maps(argc, argv);
-#if 0
     } else if (strcmp(argv[1], "smoothMaps") == 0) {
 	return main_smooth_maps(argc, argv);
+#if 0
     } else if (strcmp(argv[1], "adaMaps") == 0) {
 	return main_ada_maps(argc, argv);
 #endif

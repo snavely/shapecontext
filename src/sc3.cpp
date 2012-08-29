@@ -72,6 +72,45 @@ void write_features(const std::vector<feature_t> &features,
     fclose(f_descs);
 }
 
+void write_match_file(const char *filename, const img_dmap_t *dmap)
+{
+    int w = dmap->w, h = dmap->h;
+
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("[write_match_file] Error opening file %s for writing\n",
+               filename);
+        return;
+    }
+
+    /* Count number of valid matches */
+    int idx = 0;
+    int num_valid_matches = 0;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++, idx++) {
+            if (dmap->dists[idx] == DBL_MAX)
+                continue;
+            num_valid_matches++;
+        }
+    }
+
+    fprintf(f, "%d\n", num_valid_matches);
+    
+    /* Now, write the matches */
+    idx = 0;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++, idx++) {
+            if (dmap->dists[idx] == DBL_MAX)
+                continue;
+
+            fprintf(f, "%0.3f %0.3f %0.3f %0.3f\n", 
+                    (float) x, (float) y, Vx(dmap->nns[idx]), Vy(dmap->nns[idx]));
+        }
+    }
+
+    fclose(f);
+}
+
 std::vector<feature_t> 
     compute_shape_context_driver(img_t *img_edge, 
                                  int num_rings, int num_wedges, 
@@ -82,6 +121,7 @@ std::vector<feature_t>
     int h = img_edge->h;
     int num_pixels = w * h;
     int descriptor_size = num_rings * num_wedges;
+    int take_sqrt = 1;
     // vec_t *v = (vec_t *) malloc(sizeof(vec_t) * num_pixels);
 
     std::vector<vec_t> v;
@@ -92,7 +132,7 @@ std::vector<feature_t>
     }
 
     compute_shape_context(img_edge, num_rings, num_wedges, factor, sigma, 
-			  normalize, &(v[0]));
+			  normalize, take_sqrt, &(v[0]));
 
     std::vector<feature_t> features;
     features.resize(num_pixels);
@@ -360,16 +400,17 @@ int main_smooth_maps(int argc, char **argv)
 int main_initialize_maps(int argc, char **argv) 
 {
     // img_t *img_edge1 = NULL, *img_edge2 = NULL;
-    img_dmap_t *dmap1to2, *dmap2to1, *dmap1to2_sym, *dmap2to1_sym;
-    img_dist_pyr_t *dpyr1to2, *dpyr2to1;
+    img_dmap_t *dmap1to2, *dmap2to1, *dmap1to2_sym;
+    // *dmap2to1_sym;
+    // img_dist_pyr_t *dpyr1to2, *dpyr2to1;
 
     // vec_t *v1 = NULL, *v2 = NULL;
     // std::vector<feature_t> v1, v2;
     std::vector<feature_t> f1, f2;
 
-    if (argc != 8) {
+    if (argc != 9) {
 	printf("Usage: %s initMaps <edgeimg1.bmp> <edgeimg2.bmp> "
-	       "<feat1.ks> <feat1.desc> <feat2.ks> <feat2.desc>\n", 
+	       "<feat1.ks> <feat1.desc> <feat2.ks> <feat2.desc> <matches.txt>\n", 
 	       argv[0]);
 	return -1;
     }
@@ -385,14 +426,24 @@ int main_initialize_maps(int argc, char **argv)
     const char *keys2_out = argv[6];
     const char *descs2_out = argv[7];
 
+    const char *matches_out = argv[8];
+
     img_t *img_edge1 = img_read_bmp_file(in_image1);
     img_t *img_edge2 = img_read_bmp_file(in_image2);
     
-#define NUM_RINGS 5 // 6 // 4 // 6 // 14
+#if 0 // original settings
+#define NUM_RINGS   5 // 6 // 4 // 6 // 14
 #define NUM_WEDGES 12 // 8
-#define FACTOR 2.4 // 2.0 // 3.0 // 2.0
-#define SIGMA 1.0 /* For now, sigma is not used */
-#define NORMALIZE 1
+#define FACTOR    2.4 // 2.0 // 3.0 // 2.0
+#define SIGMA     1.0 /* For now, sigma is not used */
+#define NORMALIZE   1
+#else // new settings
+#define NUM_RINGS   5 // 6 // 4 // 6 // 14
+#define NUM_WEDGES 36 // 12 // 8
+#define FACTOR    2.4 // 2.0 // 3.0 // 2.0
+#define SIGMA     1.0 /* For now, sigma is not used */
+#define NORMALIZE   1
+#endif
 
     /* First shape context */
     printf("Computing first shape context...\n");
@@ -409,12 +460,15 @@ int main_initialize_maps(int argc, char **argv)
     write_features(f1, img_edge1, keys1_out, descs1_out);
     write_features(f2, img_edge2, keys2_out, descs2_out);
 
-#if 0
-    if (compute_matches) {
+    if (true /* compute_matches */) {
         std::vector<vec_t> v1, v2;
         int f1_size = (int) f1.size();
         int f2_size = (int) f2.size();
 
+        v1.resize(f1_size);
+        v2.resize(f2_size);
+
+#ifndef __ADD_SPATIAL_DIMENSIONS__        
         for (int i = 0; i < f1_size; i++) {
             v1[i] = f1[i].v;
         }
@@ -422,6 +476,22 @@ int main_initialize_maps(int argc, char **argv)
         for (int i = 0; i < f2_size; i++) {
             v2[i] = f2[i].v;
         }
+#else
+#define SPATIAL_SCALE 0.005
+        for (int i = 0; i < f1_size; i++) {
+            v1[i] = vec_new(dim + 2);
+            v1[i].p[0] = SPATIAL_SCALE * f1[i].x;
+            v1[i].p[1] = SPATIAL_SCALE * f1[i].y;
+            memcpy(v1[i].p+2, f1[i].v.p, dim * sizeof(double));
+        }
+
+        for (int i = 0; i < f2_size; i++) {
+            v2[i] = vec_new(dim + 2);
+            v2[i].p[0] = SPATIAL_SCALE * f2[i].x;
+            v2[i].p[1] = SPATIAL_SCALE * f2[i].y;
+            memcpy(v2[i].p+2, f2[i].v.p, dim * sizeof(double));
+        }
+#endif
 
         printf("Matching shape contexts [1==>2]...\n");
         dmap1to2 = match_shape_contexts(img_edge1, img_edge2, 
@@ -443,17 +513,20 @@ int main_initialize_maps(int argc, char **argv)
             img_estimate_correspondence(img_edge2, img_edge1, 
                                         dmap2to1, dmap1to2);
 
+#if 0
         dmap2to1_sym = 
             img_estimate_correspondence(img_edge1, img_edge2, 
                                         dmap1to2, dmap2to1);
-
-        dpyr1to2 = dmap2dpyr(dmap1to2_sym);
-        dpyr2to1 = dmap2dpyr(dmap2to1_sym);
-
-        img_write_distance_pyramid_file(dpyr1to2, out_dpyr1to2);
-        img_write_distance_pyramid_file(dpyr2to1, out_dpyr2to1);
-    }
 #endif
+
+        // dpyr1to2 = dmap2dpyr(dmap1to2_sym);
+        // dpyr2to1 = dmap2dpyr(dmap2to1_sym);
+
+        // img_write_distance_pyramid_file(dpyr1to2, out_dpyr1to2);
+        // img_write_distance_pyramid_file(dpyr2to1, out_dpyr2to1);
+
+        write_match_file(matches_out, dmap1to2_sym);
+    }
 
     return 0;
 }
@@ -565,7 +638,8 @@ int main_ada_maps(int argc, char **argv)
 void printUsage(char *name) 
 {
     printf("Usage: %s initMaps <edgeimg1.bmp> <edgeimg2.bmp> "
-           "<feat1.ks> <feat1.desc> <feat2.ks> <feat2.desc>\n", name);
+           "<feat1.ks> <feat1.desc> <feat2.ks> <feat2.desc> <matches.txt>\n", 
+           name);
     printf("       %s smoothMaps <edge-image1.bmp> <edge-image2.bmp> "
 	   "<dpyr12-in> <dpyr21-in> <dpyr12-out> <dpyr21-out>"
 	   "<params.txt>\n", 
