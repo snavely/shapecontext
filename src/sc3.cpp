@@ -21,6 +21,8 @@
 #include "register.h"
 #include "shapecontext.h"
 
+#define __ADD_SPATIAL_DIMENSIONS__
+
 typedef struct {
     float x, y;  // feature position
     vec_t v;     // descriptor vector
@@ -464,6 +466,7 @@ int main_initialize_maps(int argc, char **argv)
         std::vector<vec_t> v1, v2;
         int f1_size = (int) f1.size();
         int f2_size = (int) f2.size();
+        int dim = f1[0].v.d;
 
         v1.resize(f1_size);
         v2.resize(f2_size);
